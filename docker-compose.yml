@@ -51,24 +51,17 @@ services:
       # /demo/reset поднимается только с явно заданным секретом.
       DEMO_RESET_SECRET: ${DEMO_RESET_SECRET:-}
 
-    ports:
-      - "8080:8080"
-
-
-
   front:
     build:
       context: ./front
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: http://localhost:8080
+        VITE_API_BASE_URL: ""
 
     container_name: trade-chain-front
 
     depends_on:
       - app
 
-    ports:
-      - "3000:80"
 volumes:
   postgres_data:
