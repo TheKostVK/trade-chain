@@ -12,9 +12,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-trade_chain}
 
-    ports:
-      - "5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # test_case.sql намеренно не монтируется: он очищает БД и предназначен

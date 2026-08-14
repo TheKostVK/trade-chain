@@ -37,7 +37,9 @@ UPDATE customers SET full_name = 'Соколова Мария' WHERE customer_id
 UPDATE customers SET full_name = 'Борисов Денис' WHERE customer_id = '2cc3a6fa-a51f-5161-8867-64c55990cdb0';
 UPDATE customers SET full_name = 'Медведева Алина' WHERE customer_id = '3632cae2-bf00-5d1b-b57f-7637d90ffb5e';
 
-INSERT INTO reviews (review_id, chain_id, from_customer_id, to_customer_id, product_id, rating, comment, created_at, updated_at) VALUES
+INSERT INTO reviews (review_id, chain_id, from_customer_id, to_customer_id, product_id, rating, comment, created_at, updated_at)
+SELECT seed.review_id::uuid, seed.chain_id::uuid, seed.from_customer_id::uuid, seed.to_customer_id::uuid, seed.product_id::uuid, seed.rating::integer, seed.comment::text, seed.created_at::timestamptz, seed.updated_at::timestamptz
+FROM (VALUES
     ('e3f2592f-4677-5284-ab8f-42a7f4bee58a', NULL, 'd3b90730-bf1f-5c12-95c7-b1ff3908167c', '4f7a8183-d03c-52ad-9ef9-9821a1f40c8b', '27d2d5c6-d819-51a8-a730-629f37d05784', 1, 'Долго не выходил(а) на связь, пришлось напоминать несколько раз.', '2026-06-05T00:00:00.000Z', '2026-06-05T00:00:00.000Z'),
     ('aa86b60e-dfbc-5c24-b1a9-ce0195acd658', NULL, 'f69088b0-d6a9-5f50-bb4e-be9b46cb8664', '4f7a8183-d03c-52ad-9ef9-9821a1f40c8b', 'e521eae7-f089-495c-b242-836ca983c834', 3, 'Задержался с ответом на сообщения, но в итоге всё решили.', '2026-08-10T00:00:00.000Z', '2026-08-10T00:00:00.000Z'),
     ('b3df7c6a-9602-5184-97fa-87d49449c037', NULL, '1a9b30df-8e74-53f8-a55d-0c8a016995be', '4f7a8183-d03c-52ad-9ef9-9821a1f40c8b', 'e521eae7-f089-495c-b242-836ca983c834', 4, 'Быстро договорились, вещь полностью соответствует описанию.', '2026-07-17T00:00:00.000Z', '2026-07-17T00:00:00.000Z'),
@@ -119,6 +121,10 @@ INSERT INTO reviews (review_id, chain_id, from_customer_id, to_customer_id, prod
     ('141ec8a9-c64a-598d-b464-c327c3377618', NULL, '5e96d7bb-c76c-5558-881e-1b132e49d342', '3632cae2-bf00-5d1b-b57f-7637d90ffb5e', '88c33d67-83b3-5890-be85-26ad993c01ad', 4, 'Встретились без задержек, всё было как договаривались.', '2026-06-17T00:00:00.000Z', '2026-06-17T00:00:00.000Z'),
     ('9b9f7416-4ce8-5772-95e9-155b609cf353', NULL, '5f79b8c2-0940-5626-ac61-48780c00cef0', '3632cae2-bf00-5d1b-b57f-7637d90ffb5e', '159d8598-e0a6-53ab-ab1b-b42b0163bde1', 5, 'Общение прошло легко, рекомендую как надёжного партнёра по обмену.', '2026-04-17T00:00:00.000Z', '2026-04-17T00:00:00.000Z'),
     ('363c6000-badd-5331-9181-3482f4a2492d', NULL, 'f69088b0-d6a9-5f50-bb4e-be9b46cb8664', '3632cae2-bf00-5d1b-b57f-7637d90ffb5e', '306b3242-623e-5484-8f91-db3c9205b9f8', 1, 'Долго не выходил(а) на связь, пришлось напоминать несколько раз.', '2026-06-15T00:00:00.000Z', '2026-06-15T00:00:00.000Z')
+) AS seed(review_id, chain_id, from_customer_id, to_customer_id, product_id, rating, comment, created_at, updated_at)
+WHERE seed.product_id IS NULL OR EXISTS (
+    SELECT 1 FROM products p WHERE p.product_id::text = seed.product_id
+)
 ON CONFLICT DO NOTHING;
 
 COMMIT;

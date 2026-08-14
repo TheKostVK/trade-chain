@@ -163,9 +163,14 @@ const nameUpdates = bulkCustomers
 
 const reviewColumns = ['review_id', 'chain_id', 'from_customer_id', 'to_customer_id', 'product_id', 'rating', 'comment', 'created_at', 'updated_at'];
 const reviewInsert = reviewRows.length > 0
-    ? `INSERT INTO reviews (${reviewColumns.join(', ')}) VALUES\n${reviewRows
+    ? `INSERT INTO reviews (${reviewColumns.join(', ')})\nSELECT seed.review_id::uuid, seed.chain_id::uuid, seed.from_customer_id::uuid, seed.to_customer_id::uuid, seed.product_id::uuid, seed.rating::integer, seed.comment::text, seed.created_at::timestamptz, seed.updated_at::timestamptz\nFROM (VALUES\n${reviewRows
           .map((row) => `    (${reviewColumns.map((c) => sqlVal(row[c])).join(', ')})`)
-          .join(',\n')}\nON CONFLICT DO NOTHING;\n`
+          .join(',\n')}
+) AS seed(${reviewColumns.join(', ')})
+WHERE seed.product_id IS NULL OR EXISTS (
+    SELECT 1 FROM products p WHERE p.product_id::text = seed.product_id
+)
+ON CONFLICT DO NOTHING;\n`
     : '';
 
 const sqlOut = [

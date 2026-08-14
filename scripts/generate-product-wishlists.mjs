@@ -94,7 +94,13 @@ for (const [productId] of products) {
 function insert(table, columns, rows) {
     if (rows.length === 0) return '';
     const records = rows.map((row) => `    (${columns.map((c) => sqlVal(row[c])).join(', ')})`).join(',\n');
-    return `INSERT INTO ${table} (${columns.join(', ')}) VALUES\n${records}\nON CONFLICT DO NOTHING;\n`;
+    const selectedColumns = columns
+        .map((column) => `seed.${column}::${column === 'name' ? 'text' : 'uuid'}`)
+        .join(', ');
+    const predicate = table === 'wishlists'
+        ? `WHERE EXISTS (\n    SELECT 1 FROM products p WHERE p.product_id::text = seed.product_id\n)`
+        : `WHERE EXISTS (\n    SELECT 1 FROM wishlists w WHERE w.wishlist_id::text = seed.wishlist_id\n)\nAND EXISTS (\n    SELECT 1 FROM categories c WHERE c.category_id::text = seed.category_id\n)`;
+    return `INSERT INTO ${table} (${columns.join(', ')})\nSELECT ${selectedColumns}\nFROM (VALUES\n${records}\n) AS seed(${columns.join(', ')})\n${predicate}\nON CONFLICT DO NOTHING;\n`;
 }
 
 const sqlOut = [

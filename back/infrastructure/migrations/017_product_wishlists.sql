@@ -5,7 +5,9 @@
 -- карточка не всегда показывала «Владелец не указал желаемые категории».
 -- Оставшаяся часть — намеренно: не у каждого продавца есть предпочтения.
 BEGIN;
-INSERT INTO wishlists (wishlist_id, product_id, name) VALUES
+INSERT INTO wishlists (wishlist_id, product_id, name)
+SELECT seed.wishlist_id::uuid, seed.product_id::uuid, seed.name::text
+FROM (VALUES
     ('6417672b-cf64-585e-9785-a98fb276b26a', '84c30e33-46ca-4dc3-9b0a-ebdf141d6a4e', 'Ищу взамен что-то из списка'),
     ('0ca73a77-61d2-5be5-a725-4e7e84106c95', 'c9e02e06-906e-470c-b34a-e3721ce60028', 'Хочу выменять что-то отсюда'),
     ('248d2402-a5a2-5bd3-9da6-bbba730f06b4', '48cec81c-ba2e-4329-a0ac-74a3c0fff76a', 'Ищу взамен что-то из списка'),
@@ -104,9 +106,15 @@ INSERT INTO wishlists (wishlist_id, product_id, name) VALUES
     ('94eb116c-74f0-5a14-adef-dcd5baf30a39', 'b337b8f3-49cf-5e4d-ba3a-4ad424cf256f', 'Хочу выменять что-то отсюда'),
     ('226b886f-bf6d-5b11-b267-403150644c26', '2277fbaa-76d6-47a7-9b75-92c53663e482', 'Ищу взамен что-то из списка'),
     ('e9339017-6773-50f0-9265-44bdce1ee422', 'e521eae7-f089-495c-b242-836ca983c834', 'Интересны варианты обмена')
+) AS seed(wishlist_id, product_id, name)
+WHERE EXISTS (
+    SELECT 1 FROM products p WHERE p.product_id::text = seed.product_id
+)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO wishlist_options (wishlist_id, category_id) VALUES
+INSERT INTO wishlist_options (wishlist_id, category_id)
+SELECT seed.wishlist_id::uuid, seed.category_id::uuid
+FROM (VALUES
     ('6417672b-cf64-585e-9785-a98fb276b26a', '83fc91ab-ef51-55c0-bb52-6bb1ec51a886'),
     ('6417672b-cf64-585e-9785-a98fb276b26a', 'd89aaeb3-8acf-5426-869e-d055c7abe46a'),
     ('0ca73a77-61d2-5be5-a725-4e7e84106c95', '11d1dcd8-9ab3-5d64-b852-dcefcc07244a'),
@@ -307,6 +315,13 @@ INSERT INTO wishlist_options (wishlist_id, category_id) VALUES
     ('226b886f-bf6d-5b11-b267-403150644c26', '446ece12-09e7-545b-8bde-2d263ca81c50'),
     ('e9339017-6773-50f0-9265-44bdce1ee422', '64ab03bf-848b-5ff0-8e0a-de52d5d5a701'),
     ('e9339017-6773-50f0-9265-44bdce1ee422', 'f1f6cefe-fb15-5eda-a7a1-0e69562edf16')
+) AS seed(wishlist_id, category_id)
+WHERE EXISTS (
+    SELECT 1 FROM wishlists w WHERE w.wishlist_id::text = seed.wishlist_id
+)
+AND EXISTS (
+    SELECT 1 FROM categories c WHERE c.category_id::text = seed.category_id
+)
 ON CONFLICT DO NOTHING;
 
 COMMIT;
