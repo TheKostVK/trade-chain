@@ -1,7 +1,9 @@
 services:
 
   postgres:
-    image: postgres:16-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
     container_name: trade-chain-db
     restart: unless-stopped
 
@@ -17,23 +19,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
       # test_case.sql намеренно не монтируется: он очищает БД и предназначен
       # только для ручного тестирования, а не для стартового набора mock API.
-      - ./back/infrastructure/migrations/001_create_tables.sql:/docker-entrypoint-initdb.d/001_create_tables.sql:ro
-      - ./back/infrastructure/migrations/002_create_search_extension.sql:/docker-entrypoint-initdb.d/002_create_search_extension.sql:ro
-      - ./back/infrastructure/migrations/003_align_schema_with_domain.sql:/docker-entrypoint-initdb.d/003_align_schema_with_domain.sql:ro
-      - ./back/infrastructure/migrations/004_exchange_negotiation.sql:/docker-entrypoint-initdb.d/004_exchange_negotiation.sql:ro
-      - ./back/infrastructure/migrations/005_exchange_offer_details.sql:/docker-entrypoint-initdb.d/005_exchange_offer_details.sql:ro
-      - ./back/infrastructure/migrations/006_seed_mock_data.sql:/docker-entrypoint-initdb.d/006_seed_mock_data.sql:ro
-      - ./back/infrastructure/migrations/007_category_goal.sql:/docker-entrypoint-initdb.d/007_category_goal.sql:ro
-      - ./back/infrastructure/migrations/008_unavailable_chain_status.sql:/docker-entrypoint-initdb.d/008_unavailable_chain_status.sql:ro
-      - ./back/infrastructure/migrations/009_prevent_archived_product_reactivation.sql:/docker-entrypoint-initdb.d/009_prevent_archived_product_reactivation.sql:ro
-      - ./back/infrastructure/migrations/010_notification_reads.sql:/docker-entrypoint-initdb.d/010_notification_reads.sql:ro
-      - ./back/infrastructure/migrations/011_customer_full_name.sql:/docker-entrypoint-initdb.d/011_customer_full_name.sql:ro
-      - ./back/infrastructure/migrations/012_category_icon.sql:/docker-entrypoint-initdb.d/012_category_icon.sql:ro
-      - ./back/infrastructure/migrations/013_demo_accounts.sql:/docker-entrypoint-initdb.d/013_demo_accounts.sql:ro
-      - ./back/infrastructure/migrations/014_bulk_test_data.sql:/docker-entrypoint-initdb.d/014_bulk_test_data.sql:ro
-      - ./back/infrastructure/migrations/015_backfill_missing_product_images.sql:/docker-entrypoint-initdb.d/015_backfill_missing_product_images.sql:ro
-      - ./back/infrastructure/migrations/016_customer_names_and_reviews.sql:/docker-entrypoint-initdb.d/016_customer_names_and_reviews.sql:ro
-      - ./back/infrastructure/migrations/017_product_wishlists.sql:/docker-entrypoint-initdb.d/017_product_wishlists.sql:ro
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
