@@ -1,0 +1,28 @@
+services:
+
+  fmt:
+    image: golangci/golangci-lint:v2.12.2-alpine
+    working_dir: /app
+    volumes:
+      - ./back:/app
+    command: golangci-lint fmt ./...
+
+  lint:
+    image: golangci/golangci-lint:v2.12.2-alpine
+    working_dir: /app
+    volumes:
+      - ./back:/app
+      - golangci_cache:/root/.cache/golangci-lint
+    command: golangci-lint run ./...
+
+  test:
+    image: golang:1.26-alpine
+    working_dir: /app
+    volumes:
+      - ./back:/app
+      - go_cache:/go
+    command: go test ./...
+
+volumes:
+  golangci_cache:
+  go_cache:

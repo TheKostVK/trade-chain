@@ -244,8 +244,8 @@ back/infrastructure/migrations/
 Backend можно проверить без локальной установки Go:
 
 ```bash
-docker compose --profile check run --rm lint
-docker compose --profile check run --rm test
+docker compose -f docker-compose.check.yml run --rm lint
+docker compose -f docker-compose.check.yml run --rm test
 ```
 
 ### Локальные тесты backend
